@@ -66,7 +66,6 @@ if st.button("Retranscrire les MP3 en TXT et PDF"):
             txt_buffer.seek(0)
 
             # Create a PDF file in memory
-            pdf_buffer = BytesIO()
             pdf = FPDF()
             pdf.add_page()
             pdf.set_auto_page_break(auto=True, margin=15)
@@ -75,7 +74,8 @@ if st.button("Retranscrire les MP3 en TXT et PDF"):
             for line in combined_transcription.split('\n'):
                 pdf.multi_cell(0, 10, line)
 
-            pdf.output(pdf_buffer)
+            pdf_buffer = BytesIO()
+            pdf.output(pdf_buffer, 'F')
             pdf_buffer.seek(0)
 
             st.write(f"Processed {uploaded_file.name}")
