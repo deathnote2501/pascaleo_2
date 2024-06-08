@@ -1,4 +1,4 @@
 openai
 pydub
 streamlit
-fpdf
+fpdf2
