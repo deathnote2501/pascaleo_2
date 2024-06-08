@@ -4,6 +4,7 @@ from openai import OpenAI
 from pydub import AudioSegment
 import streamlit as st
 from fpdf import FPDF
+from io import BytesIO
 
 from pydub.utils import which
 AudioSegment.ffmpeg = which("ffmpeg")
@@ -59,17 +60,13 @@ if st.button("Retranscrire les MP3 en TXT et PDF"):
             # Combine all transcriptions
             combined_transcription = "\n".join(all_transcriptions)
 
-            # Construct the full path for the output text file
-            output_txt_path = f"/tmp/{Path(uploaded_file.name).stem}.txt"
+            # Write the transcription to a text file in memory
+            txt_buffer = BytesIO()
+            txt_buffer.write(combined_transcription.encode())
+            txt_buffer.seek(0)
 
-            # Write the transcription to the text file
-            with open(output_txt_path, "w") as text_file:
-                text_file.write(combined_transcription)
-
-            # Construct the full path for the output PDF file
-            output_pdf_path = f"/tmp/{Path(uploaded_file.name).stem}.pdf"
-
-            # Write the transcription to the PDF file
+            # Create a PDF file in memory
+            pdf_buffer = BytesIO()
             pdf = FPDF()
             pdf.add_page()
             pdf.set_auto_page_break(auto=True, margin=15)
@@ -78,27 +75,26 @@ if st.button("Retranscrire les MP3 en TXT et PDF"):
             for line in combined_transcription.split('\n'):
                 pdf.multi_cell(0, 10, line)
 
-            pdf.output(output_pdf_path)
+            pdf.output(pdf_buffer)
+            pdf_buffer.seek(0)
 
             st.write(f"Processed {uploaded_file.name}")
 
             # Provide download link for the text file
-            with open(output_txt_path, "r") as file:
-                st.download_button(
-                    label="Télécharger les retranscriptions (TXT)",
-                    data=file,
-                    file_name=f"{Path(uploaded_file.name).stem}.txt",
-                    mime="text/plain"
-                )
+            st.download_button(
+                label="Télécharger les retranscriptions (TXT)",
+                data=txt_buffer,
+                file_name=f"{Path(uploaded_file.name).stem}.txt",
+                mime="text/plain"
+            )
 
             # Provide download link for the PDF file
-            with open(output_pdf_path, "rb") as file:
-                st.download_button(
-                    label="Télécharger les retranscriptions (PDF)",
-                    data=file,
-                    file_name=f"{Path(uploaded_file.name).stem}.pdf",
-                    mime="application/pdf"
-                )
+            st.download_button(
+                label="Télécharger les retranscriptions (PDF)",
+                data=pdf_buffer,
+                file_name=f"{Path(uploaded_file.name).stem}.pdf",
+                mime="application/pdf"
+            )
 
         st.success("Tous les fichiers ont été traités avec succès")
     else:
