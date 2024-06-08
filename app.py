@@ -4,7 +4,6 @@ from openai import OpenAI
 from pydub import AudioSegment
 import streamlit as st
 from fpdf import FPDF
-from io import BytesIO
 
 from pydub.utils import which
 AudioSegment.ffmpeg = which("ffmpeg")
@@ -79,26 +78,27 @@ if st.button("Retranscrire les MP3 en TXT et PDF"):
             for line in combined_transcription.split('\n'):
                 pdf.multi_cell(0, 10, line)
 
-            pdf_output = BytesIO()
-            pdf.output(pdf_output)
-            pdf_output.seek(0)
+            pdf.output(output_pdf_path)
 
             st.write(f"Processed {uploaded_file.name}")
 
-            # Provide download link for both text and PDF files together
-            st.download_button(
-                label="Télécharger les retranscriptions (TXT & PDF)",
-                data=BytesIO(combined_transcription.encode('utf-8')).getvalue(),
-                file_name=f"{Path(uploaded_file.name).stem}.txt",
-                mime="text/plain"
-            )
+            # Provide download link for the text file
+            # with open(output_txt_path, "r") as file:
+            #     st.download_button(
+            #         label="Télécharger les retranscriptions (TXT)",
+            #         data=file,
+            #         file_name=f"{Path(uploaded_file.name).stem}.txt",
+            #         mime="text/plain"
+            #     )
 
-            st.download_button(
-                label="Télécharger les retranscriptions (TXT & PDF)",
-                data=pdf_output.getvalue(),
-                file_name=f"{Path(uploaded_file.name).stem}.pdf",
-                mime="application/pdf"
-            )
+            # Provide download link for the PDF file
+            with open(output_pdf_path, "rb") as file:
+                st.download_button(
+                    label="Télécharger les retranscriptions (PDF)",
+                    data=file,
+                    file_name=f"{Path(uploaded_file.name).stem}.pdf",
+                    mime="application/pdf"
+                )
 
         st.success("Tous les fichiers ont été traités avec succès")
     else:
