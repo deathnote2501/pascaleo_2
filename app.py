@@ -4,6 +4,9 @@ from openai import OpenAI
 from pydub import AudioSegment
 import streamlit as st
 
+from pydub.utils import which
+AudioSegment.ffmpeg = which("ffmpeg")
+
 # Set your API key here. It's safer to use an environment variable.
 api_key = os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY")
 if not api_key:
