@@ -18,11 +18,12 @@ if not api_key:
 client = OpenAI(api_key=api_key)
 
 # Streamlit interface
-st.title("Audio Transcription with Whisper")
-whisper_prompt = st.text_area("Set Whisper Prompt", "")
-uploaded_files = st.file_uploader("Upload MP3 Files", type="mp3", accept_multiple_files=True)
+st.title("Pascaleo")
+st.subheader("Retranscription textuelle des entretiens visios")
+whisper_prompt = st.text_area("Entrez les termes techniques issues du GPTs #4", "")
+uploaded_files = st.file_uploader("Téléversez vos fichiers MP3 pour obtenir une retranscription textuelle au format TXT et PDF", type="mp3", accept_multiple_files=True)
 
-if st.button("Process Files"):
+if st.button("Retranscrire les MP3 en TXT et PDF"):
     if uploaded_files:
         for uploaded_file in uploaded_files:
             # Save uploaded file to a temporary location
@@ -69,12 +70,12 @@ if st.button("Process Files"):
             # Provide download link for the text file
             with open(output_file_path, "r") as file:
                 st.download_button(
-                    label="Download Transcription",
+                    label="Télécharger les retranscriptions",
                     data=file,
                     file_name=f"{Path(uploaded_file.name).stem}.txt",
                     mime="text/plain"
                 )
 
-        st.success("All files have been processed!")
+        st.success("Tous les fichiers ont été traités avec succès")
     else:
-        st.error("Please upload at least one MP3 file.")
+        st.error("Veuillez téléverser au moins 1 fichier MP3")
