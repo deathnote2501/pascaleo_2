@@ -24,7 +24,7 @@ st.subheader("Retranscription textuelle des entretiens visios")
 whisper_prompt = st.text_area("Entrez les termes techniques issus du GPTs #4", "")
 uploaded_files = st.file_uploader("Téléversez vos fichiers MP3 pour obtenir une retranscription textuelle au format TXT et PDF", type="mp3", accept_multiple_files=True)
 
-if st.button("Retranscrire les MP3 en TXT et PDF"):
+if st.button("Retranscrire les MP3 en PDF"):
     if uploaded_files:
         for uploaded_file in uploaded_files:
             # Save uploaded file to a temporary location
