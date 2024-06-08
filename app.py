@@ -9,6 +9,7 @@ api_key = os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY")
 if not api_key:
     raise ValueError(
         "API key is not set. Please set the OPENAI_API_KEY environment variable."
+    )
 
 # Create an instance of the OpenAI client with the API key
 client = OpenAI(api_key=api_key)
