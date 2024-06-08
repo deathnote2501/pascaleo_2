@@ -21,7 +21,9 @@ client = OpenAI(api_key=api_key)
 # Streamlit interface
 st.title("Pascaleo")
 st.subheader("Retranscription textuelle des entretiens visios")
+st.write("\n")
 whisper_prompt = st.text_area("Entrez les termes techniques issus du GPTs #4", "")
+st.write("\n")
 uploaded_files = st.file_uploader("Téléversez vos fichiers MP3 pour obtenir une retranscription textuelle au format TXT et PDF", type="mp3", accept_multiple_files=True)
 
 if st.button("Retranscrire les MP3 en PDF"):
@@ -70,26 +72,28 @@ if st.button("Retranscrire les MP3 en PDF"):
             output_pdf_path = f"/tmp/{Path(uploaded_file.name).stem}.pdf"
 
             # Write the transcription to the PDF file
+            from fpdf import FPDF
+
             pdf = FPDF()
             pdf.add_page()
             pdf.set_auto_page_break(auto=True, margin=15)
             pdf.set_font("Arial", size=12)
 
             for line in combined_transcription.split('\n'):
-                pdf.multi_cell(0, 10, line)
+                pdf.multi_cell(0, 10, line.encode('latin-1', 'replace').decode('latin-1'))
 
             pdf.output(output_pdf_path)
 
             st.write(f"Processed {uploaded_file.name}")
 
             # Provide download link for the text file
-            # with open(output_txt_path, "r") as file:
-            #     st.download_button(
-            #         label="Télécharger les retranscriptions (TXT)",
-            #         data=file,
-            #         file_name=f"{Path(uploaded_file.name).stem}.txt",
-            #         mime="text/plain"
-            #     )
+            with open(output_txt_path, "r") as file:
+                st.download_button(
+                    label="Télécharger les retranscriptions (TXT)",
+                    data=file,
+                    file_name=f"{Path(uploaded_file.name).stem}.txt",
+                    mime="text/plain"
+                )
 
             # Provide download link for the PDF file
             with open(output_pdf_path, "rb") as file:
