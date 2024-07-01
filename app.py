@@ -48,7 +48,8 @@ if check_password():
 
     if st.button("Retranscrire les MP3 en texte"):
         if uploaded_files:
-            for uploaded_file in uploaded_files:
+            total_files = len(uploaded_files)
+            for index, uploaded_file in enumerate(uploaded_files):
                 # Save uploaded file to a temporary location
                 temp_input_path = f"/tmp/{uploaded_file.name}"
                 with open(temp_input_path, "wb") as temp_file:
@@ -90,6 +91,10 @@ if check_password():
 
                 st.write(f"Processed {uploaded_file.name}")
 
+                # Display the transcription in the browser
+                st.subheader(f"Transcription for {uploaded_file.name}")
+                st.text(combined_transcription)
+
                 # Provide download link for the text file
                 with open(output_txt_path, "r") as file:
                     st.download_button(
@@ -98,6 +103,9 @@ if check_password():
                         file_name=f"{Path(uploaded_file.name).stem}.txt",
                         mime="text/plain"
                     )
+
+                # Update the progress bar
+                st.progress((index + 1) / total_files)
 
             st.success("Tous les fichiers ont été traités avec succès")
         else:
