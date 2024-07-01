@@ -3,7 +3,6 @@ from pathlib import Path
 from openai import OpenAI
 from pydub import AudioSegment
 import streamlit as st
-from fpdf import FPDF
 
 from pydub.utils import which
 AudioSegment.ffmpeg = which("ffmpeg")
@@ -47,13 +46,9 @@ if check_password():
     uploaded_files = st.file_uploader("", type="mp3", accept_multiple_files=True)
     st.markdown("<hr>", unsafe_allow_html=True)
 
-    if st.button("Retranscrire les MP3 en PDF"):
+    if st.button("Retranscrire les MP3 en texte"):
         if uploaded_files:
-            progress_bar = st.progress(0)
-            progress_text = st.empty()
-            total_files = len(uploaded_files)
-
-            for idx, uploaded_file in enumerate(uploaded_files):
+            for uploaded_file in uploaded_files:
                 # Save uploaded file to a temporary location
                 temp_input_path = f"/tmp/{uploaded_file.name}"
                 with open(temp_input_path, "wb") as temp_file:
@@ -82,9 +77,6 @@ if check_password():
                         )
 
                     all_transcriptions.append(transcription.text)
-                    progress = ((idx + (i + ten_minutes) / duration) / total_files) * 100
-                    progress_bar.progress(int(progress))
-                    progress_text.write(f"Processing {uploaded_file.name}, chunk {i // ten_minutes + 1}")
 
                 # Combine all transcriptions
                 combined_transcription = "\n".join(all_transcriptions)
@@ -96,34 +88,17 @@ if check_password():
                 with open(output_txt_path, "w") as text_file:
                     text_file.write(combined_transcription)
 
-                # Construct the full path for the output PDF file
-                output_pdf_path = f"/tmp/{Path(uploaded_file.name).stem}.pdf"
-
-                # Write the transcription to the PDF file
-                pdf = FPDF()
-                pdf.add_page()
-                pdf.set_auto_page_break(auto=True, margin=15)
-                pdf.set_font("Helvetica", size=12)
-
-                for line in combined_transcription.split('\n'):
-                    # Remove non-printable characters
-                    clean_line = ''.join(char if char.isprintable() else '?' for char in line)
-                    pdf.multi_cell(0, 10, clean_line.encode('latin-1', 'replace').decode('latin-1'))
-
-                pdf.output(output_pdf_path)
-
                 st.write(f"Processed {uploaded_file.name}")
 
-                # Provide download link for the PDF file
-                with open(output_pdf_path, "rb") as file:
+                # Provide download link for the text file
+                with open(output_txt_path, "r") as file:
                     st.download_button(
-                        label="Télécharger les retranscriptions (PDF)",
+                        label="Télécharger les retranscriptions (TXT)",
                         data=file,
-                        file_name=f"{Path(uploaded_file.name).stem}.pdf",
-                        mime="application/pdf"
+                        file_name=f"{Path(uploaded_file.name).stem}.txt",
+                        mime="text/plain"
                     )
 
             st.success("Tous les fichiers ont été traités avec succès")
-            progress_bar.progress(100)
         else:
             st.error("Veuillez téléverser au moins 1 fichier MP3")
