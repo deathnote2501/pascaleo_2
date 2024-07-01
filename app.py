@@ -49,7 +49,11 @@ if check_password():
 
     if st.button("Retranscrire les MP3 en PDF"):
         if uploaded_files:
-            for uploaded_file in uploaded_files:
+            progress_bar = st.progress(0)
+            progress_text = st.empty()
+            total_files = len(uploaded_files)
+
+            for idx, uploaded_file in enumerate(uploaded_files):
                 # Save uploaded file to a temporary location
                 temp_input_path = f"/tmp/{uploaded_file.name}"
                 with open(temp_input_path, "wb") as temp_file:
@@ -78,6 +82,9 @@ if check_password():
                         )
 
                     all_transcriptions.append(transcription.text)
+                    progress = ((idx + (i + ten_minutes) / duration) / total_files) * 100
+                    progress_bar.progress(int(progress))
+                    progress_text.write(f"Processing {uploaded_file.name}, chunk {i // ten_minutes + 1}")
 
                 # Combine all transcriptions
                 combined_transcription = "\n".join(all_transcriptions)
@@ -96,23 +103,16 @@ if check_password():
                 pdf = FPDF()
                 pdf.add_page()
                 pdf.set_auto_page_break(auto=True, margin=15)
-                pdf.set_font("Arial", size=12)
+                pdf.set_font("Helvetica", size=12)
 
                 for line in combined_transcription.split('\n'):
-                    pdf.multi_cell(0, 10, line.encode('latin-1', 'replace').decode('latin-1'))
+                    # Remove non-printable characters
+                    clean_line = ''.join(char if char.isprintable() else '?' for char in line)
+                    pdf.multi_cell(0, 10, clean_line.encode('latin-1', 'replace').decode('latin-1'))
 
                 pdf.output(output_pdf_path)
 
                 st.write(f"Processed {uploaded_file.name}")
-
-                # Provide download link for the text file
-                # with open(output_txt_path, "r") as file:
-                #     st.download_button(
-                #         label="Télécharger les retranscriptions (TXT)",
-                #         data=file,
-                #         file_name=f"{Path(uploaded_file.name).stem}.txt",
-                #         mime="text/plain"
-                #     )
 
                 # Provide download link for the PDF file
                 with open(output_pdf_path, "rb") as file:
@@ -124,5 +124,6 @@ if check_password():
                     )
 
             st.success("Tous les fichiers ont été traités avec succès")
+            progress_bar.progress(100)
         else:
             st.error("Veuillez téléverser au moins 1 fichier MP3")
