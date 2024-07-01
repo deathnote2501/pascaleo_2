@@ -61,6 +61,8 @@ if check_password():
                 ten_minutes = 10 * 60 * 1000  # 10 minutes in milliseconds
 
                 all_transcriptions = []
+                num_chunks = (duration // ten_minutes) + 1
+                chunk_progress = st.progress(0)
 
                 # Split the audio into 10-minute chunks
                 for i in range(0, duration, ten_minutes):
@@ -78,6 +80,13 @@ if check_password():
                         )
 
                     all_transcriptions.append(transcription.text)
+                    combined_transcription = "\n".join(all_transcriptions)
+
+                    # Update the progress bar for the chunk
+                    chunk_progress.progress((i + ten_minutes) / duration)
+                    # Display the transcription in progress
+                    st.subheader(f"Transcription partielle pour {uploaded_file.name}")
+                    st.text(combined_transcription)
 
                 # Combine all transcriptions
                 combined_transcription = "\n".join(all_transcriptions)
@@ -91,8 +100,8 @@ if check_password():
 
                 st.write(f"Processed {uploaded_file.name}")
 
-                # Display the transcription in the browser
-                st.subheader(f"Transcription for {uploaded_file.name}")
+                # Display the final transcription
+                st.subheader(f"Transcription finale pour {uploaded_file.name}")
                 st.text(combined_transcription)
 
                 # Provide download link for the text file
@@ -104,7 +113,7 @@ if check_password():
                         mime="text/plain"
                     )
 
-                # Update the progress bar
+                # Update the overall progress bar
                 st.progress((index + 1) / total_files)
 
             st.success("Tous les fichiers ont été traités avec succès")
