@@ -24,7 +24,7 @@ except Exception as e:
 # Function to check password
 def check_password():
     def password_entered():
-        if st.session_state["password"] == "jeromeCPME2024":
+        if st.session_state["password"] == st.secrets["PASSWORD"]:
             st.session_state["password_correct"] = True
         else:
             st.session_state["password_correct"] = False
